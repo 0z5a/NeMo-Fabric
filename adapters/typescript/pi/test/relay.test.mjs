@@ -362,6 +362,8 @@ endpoint = "http://127.0.0.1:4320/v1/traces"
     assert.throws(() => encodeToml({ out_of_range: value }), /outside TOML's signed 64-bit range/);
   }
   assert.throws(() => encodeToml({ unsupported: null }), /unsupported by the local TOML encoder/);
+  assert.equal(encodeToml({ note: "a\u007fb" }), 'note = "a\\u007fb"\n');
+  assert.equal(encodeToml({ "k\u007f": "v" }), '"k\\u007f" = "v"\n');
 });
 
 test("rejects removed and malformed Relay OpenTelemetry shapes", () => {

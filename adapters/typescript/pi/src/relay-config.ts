@@ -300,8 +300,14 @@ export async function loadRelayPluginConfig(input: AdapterStartInput): Promise<R
   return pluginConfig;
 }
 
+// JSON string escapes are valid TOML escapes, but JSON leaves DEL (U+007F)
+// unescaped, and TOML basic strings must escape it.
+function tomlString(value: string): string {
+  return JSON.stringify(value).replace(/\u007f/g, "\\u007f");
+}
+
 function tomlKey(value: string): string {
-  return /^[A-Za-z0-9_-]+$/.test(value) ? value : JSON.stringify(value);
+  return /^[A-Za-z0-9_-]+$/.test(value) ? value : tomlString(value);
 }
 
 function tomlPath(parts: string[]): string {
@@ -310,7 +316,7 @@ function tomlPath(parts: string[]): string {
 
 function tomlScalar(value: unknown): string {
   if (typeof value === "string") {
-    return JSON.stringify(value);
+    return tomlString(value);
   }
   if (typeof value === "boolean") {
     return value ? "true" : "false";
